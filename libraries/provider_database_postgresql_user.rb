@@ -47,17 +47,21 @@ class Chef
 
               # Options from Postgresql specific resource
               options += " #{@new_resource.createdb ? 'CREATEDB' : 'NOCREATEDB'}" if @new_resource.respond_to?(:createdb)
-              options += " #{@new_resource.createrole ? 'CREATEROLE' : 'NOCREATEROLE'}" if @new_resource.respond_to?(:createrole)
-              options += " #{@new_resource.login ? 'LOGIN' : 'NOLOGIN'}" if @new_resource.respond_to?(:login)
-              options += " #{@new_resource.replication ? 'REPLICATION' : 'NOREPLICATION'}" if @new_resource.respond_to?(:replication) && version_greater_than?(90_100)
-              options += " #{@new_resource.superuser ? 'SUPERUSER' : 'NOSUPERUSER'}" if @new_resource.respond_to?(:superuser)
+              if version_greater_than?(9)
+                options += " #{@new_resource.createrole ? 'CREATEROLE' : 'NOCREATEROLE'}" if @new_resource.respond_to?(:createrole)
+                options += " #{@new_resource.login ? 'LOGIN' : 'NOLOGIN'}" if @new_resource.respond_to?(:login)
+                options += " #{@new_resource.replication ? 'REPLICATION' : 'NOREPLICATION'}" if @new_resource.respond_to?(:replication) && version_greater_than?(90_100)
+                options += " #{@new_resource.superuser ? 'SUPERUSER' : 'NOSUPERUSER'}" if @new_resource.respond_to?(:superuser)
+              end
 
               # Options from a non Postgresql specific resource
               options += " #{Chef::Resource::PostgresqlDatabaseUser::CREATE_DB_DEFAULT ? 'CREATEDB' : 'NOCREATEDB'}" unless @new_resource.respond_to?(:createdb)
-              options += " #{Chef::Resource::PostgresqlDatabaseUser::CREATE_ROLE_DEFAULT ? 'CREATEROLE' : 'NOCREATEROLE'}" unless @new_resource.respond_to?(:createrole)
-              options += " #{Chef::Resource::PostgresqlDatabaseUser::LOGIN_DEFAULT ? 'LOGIN' : 'NOLOGIN'}" unless @new_resource.respond_to?(:login)
-              options += " #{Chef::Resource::PostgresqlDatabaseUser::REPLICATION_DEFAULT ? 'REPLICATION' : 'NOREPLICATION'}" unless @new_resource.respond_to?(:replication) || !version_greater_than?(90_100)
-              options += " #{Chef::Resource::PostgresqlDatabaseUser::SUPERUSER_DEFAULT ? 'SUPERUSER' : 'NOSUPERUSER'}" unless @new_resource.respond_to?(:superuser)
+              if version_greater_than?(9)
+                options += " #{Chef::Resource::PostgresqlDatabaseUser::CREATE_ROLE_DEFAULT ? 'CREATEROLE' : 'NOCREATEROLE'}" unless @new_resource.respond_to?(:createrole)
+                options += " #{Chef::Resource::PostgresqlDatabaseUser::LOGIN_DEFAULT ? 'LOGIN' : 'NOLOGIN'}" unless @new_resource.respond_to?(:login)
+                options += " #{Chef::Resource::PostgresqlDatabaseUser::REPLICATION_DEFAULT ? 'REPLICATION' : 'NOREPLICATION'}" unless @new_resource.respond_to?(:replication) || !version_greater_than?(90_100)
+                options += " #{Chef::Resource::PostgresqlDatabaseUser::SUPERUSER_DEFAULT ? 'SUPERUSER' : 'NOSUPERUSER'}" unless @new_resource.respond_to?(:superuser)
+              end
 
               statement = "CREATE USER \"#{@new_resource.username}\""
               statement += " WITH #{options}" unless options.empty?

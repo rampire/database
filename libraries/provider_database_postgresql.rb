@@ -108,6 +108,10 @@ class Chef
           begin
             ret = db('template1').exec('SHOW server_version_num;')
             server_version_int = ret.getvalue(0, 0).to_i
+          rescue
+            # Could it be an older version
+            ret = db('template1').exec('SELECT VERSION();')
+            server_version_int = ret.getvalue(0, 0).split[1].to_i
           ensure
             close
           end
